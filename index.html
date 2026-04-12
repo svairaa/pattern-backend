@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dress Pattern</title>
+</head>
+<body>
+
+<h2>Upload Dress Image</h2>
+
+<input type="file" id="imageInput">
+<br><br>
+
+<button onclick="sendImage()">Send</button>
+
+<script>
+function sendImage() {
+  let file = document.getElementById("imageInput").files[0];
+
+  let formData = new FormData();
+  formData.append("file", file);
+
+  fetch("https://pattern-backend-wjbp.onrender.com", {
+    method: "POST",
+    body: formData
+  })
+  .then(res => res.text())
+  .then(data => alert(data));
+}
+</script>
+
+</body>
+</html>
