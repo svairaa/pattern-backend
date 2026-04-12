@@ -2,10 +2,11 @@
 <html>
 <head>
   <title>Measurements</title>
+
   <style>
     body {
-      background: #f3f8f5;
-      font-family: 'Segoe UI';
+      background: #eef5f0;
+      font-family: Arial;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -15,18 +16,14 @@
     .box {
       background: white;
       padding: 30px;
-      border-radius: 25px;
-      width: 320px;
+      border-radius: 20px;
+      width: 300px;
       text-align: center;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-    }
-
-    h2 {
-      color: #2e7d32;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
 
     input {
-      width: 100%;
+      width: 90%;
       padding: 10px;
       margin-top: 10px;
       border-radius: 10px;
@@ -35,12 +32,12 @@
 
     button {
       margin-top: 15px;
-      padding: 12px;
+      padding: 10px;
       width: 100%;
       border: none;
       background: green;
       color: white;
-      border-radius: 20px;
+      border-radius: 10px;
     }
   </style>
 </head>
@@ -50,17 +47,43 @@
 <div class="box">
   <h2>Enter Measurements 📏</h2>
 
-  <input placeholder="Bust">
-  <input placeholder="Waist">
-  <input placeholder="Hip">
-  <input placeholder="Length">
+  <input id="bust" placeholder="Bust (cm)">
+  <input id="waist" placeholder="Waist (cm)">
+  <input id="hip" placeholder="Hip (cm)">
+  <input id="length" placeholder="Length (cm)">
 
-  <button onclick="done()">Finish ✔</button>
+  <button onclick="submitData()">Generate Pattern 🚀</button>
 </div>
 
 <script>
-function done() {
-  alert("Dress customization started 🎉");
+async function submitData() {
+
+  let size = localStorage.getItem("size");
+
+  let data = {
+    size: size,
+    bust: document.getElementById("bust").value,
+    waist: document.getElementById("waist").value,
+    hip: document.getElementById("hip").value,
+    length: document.getElementById("length").value
+  };
+
+  try {
+    let response = await fetch("https://pattern-backend-wjbp.onrender.com/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    let result = await response.json();
+
+    alert("Pattern Generated ✅");
+
+  } catch (error) {
+    alert("Error ❌");
+  }
 }
 </script>
 
