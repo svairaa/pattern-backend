@@ -1,94 +1,84 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-  <title>Upload Dress</title>
+  <title>Select Size</title>
   <style>
     body {
-      background: #dfeee7;
-      font-family: Arial;
+      background: linear-gradient(to bottom, #e8f5ec, #f4fbf7);
+      font-family: 'Segoe UI';
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
 
-    .card {
+    .box {
       background: white;
       padding: 30px;
-      border-radius: 20px;
+      border-radius: 25px;
       text-align: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      width: 300px;
+      width: 320px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+      animation: fadeIn 1s ease;
     }
 
     h2 {
       color: #2e7d32;
+      margin-bottom: 20px;
+    }
+
+    select {
+      padding: 10px;
+      border-radius: 10px;
+      width: 100%;
+      margin-bottom: 20px;
     }
 
     button {
-      background: #4CAF50;
+      background: linear-gradient(45deg, #4CAF50, #2e7d32);
       color: white;
       border: none;
-      padding: 10px 20px;
+      padding: 12px;
+      width: 100%;
       border-radius: 20px;
-      margin-top: 10px;
       cursor: pointer;
+      font-size: 16px;
+      transition: 0.3s;
     }
 
-    #arrow {
-      font-size: 30px;
-      margin-top: 20px;
-      display: none;
-      cursor: pointer;
-      animation: bounce 1s infinite;
+    button:hover {
+      transform: scale(1.05);
     }
 
-    @keyframes bounce {
-      0% { transform: translateX(0); }
-      50% { transform: translateX(10px); }
-      100% { transform: translateX(0); }
-    }
-
-    .success {
-      color: green;
-      margin-top: 10px;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px);}
+      to { opacity: 1; transform: translateY(0);}
     }
   </style>
 </head>
 
 <body>
 
-<div class="card">
-  <h2>Upload Dress Image 🌸</h2>
+<div class="box">
+  <h2>Select Your Size 👗</h2>
 
-  <input type="file" id="file"><br>
+  <select id="size">
+    <option>S</option>
+    <option>M</option>
+    <option>L</option>
+    <option>XL</option>
+    <option>XXL</option>
+  </select>
 
-  <button onclick="send()">Send ➤</button>
-
-  <div class="success" id="msg"></div>
-
-  <div id="arrow" onclick="nextPage()">➜</div>
+  <button onclick="next()">Continue ➜</button>
 </div>
 
-<audio id="sound">
-  <source src="https://www.soundjay.com/water/sounds/water-drop-1.mp3">
-</audio>
-
 <script>
-function send() {
-  document.getElementById("msg").innerHTML = "Success ✅";
-
-  // play sound
-  document.getElementById("sound").play();
-
-  // show arrow
-  document.getElementById("arrow").style.display = "block";
-}
-
-function nextPage() {
-  window.location.href = "size.html";
+function next() {
+  window.location.href = "measure.html";
 }
 </script>
 
 </body>
 </html>
+  
