@@ -6,47 +6,66 @@
   <style>
     body {
       margin: 0;
-      height: 100vh;
+      font-family: Arial;
+      background: linear-gradient(135deg, #dfeee7, #cfe3d8);
       display: flex;
       justify-content: center;
       align-items: center;
-      background: linear-gradient(to bottom, #e6f4ec, #f4fbf7);
-      font-family: 'Segoe UI';
+      height: 100vh;
     }
 
     .card {
       background: white;
       padding: 30px;
       border-radius: 25px;
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
       text-align: center;
-      width: 320px;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+      width: 300px;
+      animation: fadeIn 0.6s ease;
     }
 
     h2 {
       color: #2e7d32;
+      margin-bottom: 20px;
+    }
+
+    input {
+      margin-top: 10px;
     }
 
     button {
-      background: linear-gradient(45deg, #4CAF50, #2e7d32);
-      color: white;
+      margin-top: 20px;
+      padding: 12px 25px;
       border: none;
-      padding: 12px 20px;
-      border-radius: 25px;
+      border-radius: 20px;
+      background: #2e7d32;
+      color: white;
+      font-size: 16px;
       cursor: pointer;
-      margin-top: 10px;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #1b5e20;
+    }
+
+    #msg {
+      margin-top: 15px;
+      color: green;
+      font-weight: bold;
     }
 
     #arrow {
-      font-size: 30px;
-      margin-top: 20px;
       display: none;
+      margin-top: 20px;
+      font-size: 25px;
       cursor: pointer;
+      color: #2e7d32;
     }
 
-    .success {
-      color: green;
-      margin-top: 10px;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px);}
+      to { opacity: 1; transform: translateY(0);}
     }
   </style>
 </head>
@@ -56,28 +75,48 @@
 <div class="card">
   <h2>Upload Dress Image 🌸</h2>
 
-  <input type="file" id="file"><br>
+  <input type="file" id="file">
+
+  <br>
 
   <button onclick="send()">Send ➤</button>
 
-  <div class="success" id="msg"></div>
+  <div id="msg"></div>
 
-  <div id="arrow" onclick="nextPage()">➜</div>
+  <div id="arrow" onclick="goNext()">➡</div>
 </div>
 
-<audio id="sound">
-  <source src="https://www.soundjay.com/water/sounds/water-drop-1.mp3">
-</audio>
-
 <script>
-function send() {
-  document.getElementById("msg").innerHTML = "Success ✅";
-  document.getElementById("sound").play();
-  document.getElementById("arrow").style.display = "block";
+async function send() {
+  let fileInput = document.getElementById("file");
+  let file = fileInput.files[0];
+
+  if (!file) {
+    alert("Please select image ❗");
+    return;
+  }
+
+  let formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    let response = await fetch("https://pattern-backend-wjbp.onrender.com/upload", {
+      method: "POST",
+      body: formData
+    });
+
+    let data = await response.json();
+
+    document.getElementById("msg").innerHTML = "Uploaded Successfully ✅";
+    document.getElementById("arrow").style.display = "block";
+
+  } catch (error) {
+    alert("Upload failed ❌");
+  }
 }
 
-function nextPage() {
-  window.location.href = "./size.html";
+function goNext() {
+  window.location.href = "size.html";
 }
 </script>
 
