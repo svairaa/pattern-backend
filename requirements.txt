@@ -2,3 +2,4 @@ flask
 flask-cors
 ezdxf
 gunicorn
+reportlab
