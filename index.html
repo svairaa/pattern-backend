@@ -1,113 +1,92 @@
-  <!DOCTYPE html>
-<html lang="en">
+    <!DOCTYPE html>
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Dress Upload</title>
+  <title>Upload Dress</title>
+  <style>
+    body {
+      background: #dfeee7;
+      font-family: Arial;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
 
-<style>
-body {
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #e6f4ea, #f5fff7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      width: 300px;
+    }
 
-/* Main Card */
-.container {
-  background: white;
-  padding: 40px;
-  border-radius: 20px;
-  width: 320px;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  animation: fadeIn 1s ease;
-}
+    h2 {
+      color: #2e7d32;
+    }
 
-/* Title */
-h2 {
-  margin-bottom: 20px;
-  color: #2e7d32;
-}
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
 
-/* File input */
-input[type="file"] {
-  margin: 15px 0;
-}
+    #arrow {
+      font-size: 30px;
+      margin-top: 20px;
+      display: none;
+      cursor: pointer;
+      animation: bounce 1s infinite;
+    }
 
-/* Button */
-button {
-  margin-top: 15px;
-  padding: 12px 25px;
-  border: none;
-  background: linear-gradient(45deg, #66bb6a, #43a047);
-  color: white;
-  border-radius: 25px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: 0.3s;
-}
+    @keyframes bounce {
+      0% { transform: translateX(0); }
+      50% { transform: translateX(10px); }
+      100% { transform: translateX(0); }
+    }
 
-button:hover {
-  transform: scale(1.05);
-  background: linear-gradient(45deg, #43a047, #2e7d32);
-}
-
-/* Status text */
-#status {
-  margin-top: 15px;
-  font-weight: bold;
-  color: #2e7d32;
-}
-
-/* Animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px);}
-  to { opacity: 1; transform: translateY(0);}
-}
-</style>
+    .success {
+      color: green;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="card">
   <h2>Upload Dress Image 🌸</h2>
 
-  <input type="file" id="fileInput">
-  <br>
+  <input type="file" id="file"><br>
 
-  <button onclick="uploadImage()">Send ➤</button>
+  <button onclick="send()">Send ➤</button>
 
-  <p id="status"></p>
+  <div class="success" id="msg"></div>
+
+  <div id="arrow" onclick="nextPage()">➜</div>
 </div>
 
+<audio id="sound">
+  <source src="https://www.soundjay.com/water/sounds/water-drop-1.mp3">
+</audio>
+
 <script>
-function uploadImage() {
-  const file = document.getElementById("fileInput").files[0];
+function send() {
+  document.getElementById("msg").innerHTML = "Success ✅";
 
-  if (!file) {
-    alert("Please select a file");
-    return;
-  }
+  // play sound
+  document.getElementById("sound").play();
 
-  const formData = new FormData();
-  formData.append("file", file);
+  // show arrow
+  document.getElementById("arrow").style.display = "block";
+}
 
-  document.getElementById("status").innerText = "Uploading...";
-
-  fetch("https://pattern-backend-wjbp.onrender.com/upload", {
-    method: "POST",
-    body: formData
-  })
-  .then(response => response.json())
-  .then(data => {
-    document.getElementById("status").innerText = "Success ✅";
-  })
-  .catch(error => {
-    document.getElementById("status").innerText = "Error ❌";
-  });
+function nextPage() {
+  window.location.href = "size.html";
 }
 </script>
 
