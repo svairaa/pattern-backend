@@ -1,14 +1,8 @@
-<button onclick="goHome()">⬅ Back</button>
-
-<script>
-function goHome() {
-  window.location.href = "index.html";
-}
-</script>
 <!DOCTYPE html>
 <html>
 <head>
   <title>Select Size</title>
+
   <style>
     body {
       background: #f3f8f5;
@@ -39,16 +33,28 @@ function goHome() {
       background: green;
       color: white;
       border: none;
+      cursor: pointer;
+    }
+
+    .back {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: #ccc;
+      color: black;
     }
   </style>
 </head>
 
 <body>
 
+<!-- Back Button -->
+<button class="back" onclick="goHome()">⬅ Back</button>
+
 <div class="box">
   <h2>Select Your Size 👗</h2>
 
-  <select>
+  <select id="size">
     <option>S</option>
     <option>M</option>
     <option>L</option>
@@ -57,8 +63,18 @@ function goHome() {
   </select>
 
   <br>
-  <button>Continue</button>
+  <button onclick="goNext()">Continue ➜</button>
 </div>
+
+<script>
+function goHome() {
+  window.location.href = "./index.html";
+}
+
+function goNext() {
+  alert("Size selected ✔");
+}
+</script>
 
 </body>
 </html>
