@@ -20,3 +20,9 @@ def upload():
 
 if __name__ == '__main__':
     app.run()
+@app.route("/generate", methods=["POST"])
+def generate():
+    data = request.json
+    print(data)  # check values
+
+    return {"status": "pattern created"}
