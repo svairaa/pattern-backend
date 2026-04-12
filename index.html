@@ -1,108 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Upload Dress</title>
-
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(to bottom, #e6f4ec, #f4fbf7);
-      font-family: 'Segoe UI';
-    }
-
-    .card {
-      background: white;
-      padding: 30px;
-      border-radius: 25px;
-      text-align: center;
-      width: 320px;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-      animation: fadeIn 1s ease;
-    }
-
-    h2 {
-      color: #2e7d32;
-      margin-bottom: 20px;
-    }
-
-    input {
-      margin: 10px 0;
-    }
-
-    button {
-      background: linear-gradient(45deg, #4CAF50, #2e7d32);
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 25px;
-      cursor: pointer;
-      margin-top: 10px;
-      transition: 0.3s;
-    }
-
-    button:hover {
-      transform: scale(1.05);
-    }
-
-    #arrow {
-      font-size: 30px;
-      margin-top: 20px;
-      display: none;
-      cursor: pointer;
-      animation: bounce 1s infinite;
-    }
-
-    .success {
-      color: green;
-      margin-top: 10px;
-    }
-
-    @keyframes bounce {
-      0% { transform: translateX(0); }
-      50% { transform: translateX(10px); }
-      100% { transform: translateX(0); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px);}
-      to { opacity: 1; transform: translateY(0);}
-    }
-  </style>
+  <title>Loading...</title>
 </head>
 
 <body>
 
-<div class="card">
-  <h2>Upload Dress Image 🌸</h2>
-
-  <input type="file" id="file"><br>
-
-  <button onclick="send()">Send ➤</button>
-
-  <div class="success" id="msg"></div>
-
-  <div id="arrow" onclick="nextPage()">➜</div>
-</div>
-
-<audio id="sound">
-  <source src="https://www.soundjay.com/water/sounds/water-drop-1.mp3">
-</audio>
-
 <script>
-function send() {
-  document.getElementById("msg").innerHTML = "Success ✅";
-  document.getElementById("sound").play();
-  document.getElementById("arrow").style.display = "block";
-}
-
-function nextPage() {
-  window.location.href = "size.html";
-}
+  window.location.href = "./home.html";
 </script>
 
 </body>
 </html>
+      
