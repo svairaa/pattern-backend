@@ -1,80 +1,10 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Select Size</title>
+  <script>
+function goNext() {
+  let size = document.getElementById("size").value;
 
-  <style>
-    body {
-      background: #f3f8f5;
-      font-family: Arial;
-      text-align: center;
-      padding-top: 100px;
-    }
+  // store size in browser
+  localStorage.setItem("size", size);
 
-    .box {
-      background: white;
-      padding: 30px;
-      border-radius: 20px;
-      display: inline-block;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
-
-    h2 {
-      color: #2e7d32;
-    }
-
-    select, button {
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 10px;
-    }
-
-    button {
-      background: green;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    .back {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      background: #ccc;
-      color: black;
-    }
-  </style>
-</head>
-
-<body>
-
-<!-- Back Button -->
-<button class="back" onclick="goHome()">⬅ Back</button>
-
-<div class="box">
-  <h2>Select Your Size 👗</h2>
-
-  <select id="size">
-    <option>S</option>
-    <option>M</option>
-    <option>L</option>
-    <option>XL</option>
-    <option>XXL</option>
-  </select>
-
-  <br>
-  <button onclick="goNext()">Continue ➜</button>
-</div>
-
-<script>
-function goHome() {
   window.location.href = "./measure.html";
 }
-
-function goNext() {
-  alert("Size selected ✔");
-}
 </script>
-
-</body>
-</html>
