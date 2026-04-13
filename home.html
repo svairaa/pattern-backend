@@ -1,64 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Upload Dress</title>
+    <title>Pattern Generator</title>
+    <style>
+        body {
+            background: #dff5e3;
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
 
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: #dfeee7;
-      font-family: Arial;
-    }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
 
-    .card {
-      background: white;
-      padding: 30px;
-      border-radius: 20px;
-      text-align: center;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      width: 280px;
-    }
-
-    h2 {
-      color: #2e7d32;
-    }
-
-    input {
-      margin-top: 10px;
-    }
-
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 20px;
-      background: #4caf50;
-      color: white;
-      font-size: 16px;
-    }
-  </style>
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #7ecf9a;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
 </head>
-
 <body>
 
 <div class="card">
-  <h2>Upload Your Dress 👗</h2>
-
-  <input type="file">
-
-  <br>
-
-  <!-- ✅ THIS BUTTON FIXES YOUR PROBLEM -->
-  <button onclick="goNext()">Analyze ➜</button>
+    <h2>Upload Dress</h2>
+    <input type="file" id="file">
+    <br><br>
+    <button onclick="upload()">Next →</button>
 </div>
 
 <script>
-function goNext() {
-  window.location.href = "size.html";
+function upload() {
+    let file = document.getElementById("file").files[0];
+
+    let formData = new FormData();
+    formData.append("file", file);
+
+    fetch("http://127.0.0.1:5000/upload", {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        localStorage.setItem("style", JSON.stringify(data));
+        window.location.href = "measure.html";
+    });
 }
 </script>
 
