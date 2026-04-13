@@ -1,27 +1,47 @@
-from flask import send_file
-from reportlab.platypus import SimpleDocTemplate, Paragraph
+from flask import Flask, request, send_file, jsonify
+from flask_cors import CORS
+from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
+import os
+
+app = Flask(__name__)
+CORS(app)
+
+@app.route("/upload", methods=["POST"])
+def upload():
+    file = request.files.get("file")
+    if not file:
+        return jsonify({"error": "No file"}), 400
+
+    file.save(file.filename)
+    return jsonify({"msg": "uploaded"})
 
 @app.route("/generate", methods=["POST"])
 def generate():
     data = request.json
 
-    # Create PDF
-    file_path = "pattern.pdf"
+    def cm(x): return float(x) * 28.35
 
-    doc = SimpleDocTemplate(file_path, pagesize=A4)
-    styles = getSampleStyleSheet()
+    bust = cm(data["bust"])
+    length = cm(data["length"])
 
-    content = []
+    c = canvas.Canvas("pattern.pdf", pagesize=A4)
+    width, height = A4
 
-    content.append(Paragraph("Dress Pattern (Basic)", styles["Title"]))
-    content.append(Paragraph(f"Size: {data.get('size')}", styles["Normal"]))
-    content.append(Paragraph(f"Bust: {data.get('bust')} cm", styles["Normal"]))
-    content.append(Paragraph(f"Waist: {data.get('waist')} cm", styles["Normal"]))
-    content.append(Paragraph(f"Hip: {data.get('hip')} cm", styles["Normal"]))
-    content.append(Paragraph(f"Length: {data.get('length')} cm", styles["Normal"]))
+    x = 50
+    y = height - 50
 
-    doc.build(content)
+    # rectangle pattern
+    c.rect(x, y-length, bust/4, length)
 
-    return send_file(file_path, as_attachment=True)
+    # waist line
+    c.line(x, y-length/2, x + bust/4, y-length/2)
+
+    c.drawString(50, 800, "Pattern Generated")
+
+    c.save()
+
+    return send_file("pattern.pdf", as_attachment=True)
+
+if __name__ == "__main__":
+    app.run()
