@@ -1,158 +1,95 @@
+from flask import Flask, request, send_file
 from flask_cors import CORS
-from flask import Flask, request, send_file, jsonify
-from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
-from reportlab.lib.units import cm
-from PIL import Image
-import os
+import io
+import math
 
 app = Flask(__name__)
 CORS(app)
 
-@app.route("/")
-def home():
-    return "Advanced Pattern Engine Running ✅"
-
-
-# -------- FAKE AI DETECTION (IMAGE BASED RULES) --------
-def detect_from_image(image_path):
-    try:
-        img = Image.open(image_path)
-        width, height = img.size
-
-        ratio = height / width
-
-        # Simple logic (placeholder AI)
-        if ratio > 1.5:
-            dress_type = "long"
-        else:
-            dress_type = "top"
-
-        # Dummy neckline + sleeve
-        neckline = "round"
-        sleeve = "short"
-
-        return dress_type, neckline, sleeve
-
-    except:
-        return "top", "round", "sleeveless"
-
-
 @app.route("/generate", methods=["POST"])
 def generate():
-    try:
-        data = request.form
 
-        bust = float(data.get("bust", 90))
-        waist = float(data.get("waist", 70))
-        length = float(data.get("length", 100))
+    data = request.json
 
-        image = request.files.get("image")
+    bust = float(data.get("bust", 36))
+    waist = float(data.get("waist", 28))
+    length = float(data.get("length", 40))
 
-        image_path = "temp.jpg"
-        if image:
-            image.save(image_path)
-            dress_type, neckline, sleeve_type = detect_from_image(image_path)
-        else:
-            dress_type, neckline, sleeve_type = "top", "round", "sleeveless"
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer)
 
-        # ---------- CONVERT ----------
-        bust *= cm
-        waist *= cm
-        length *= cm
+    # Scale factor (1 inch = 72 points)
+    scale = 10
 
-        scale = 0.7
-        fw = (bust / 4 + 2*cm) * scale
-        ww = (waist / 4 + 2*cm) * scale
-        length *= scale
+    # Base points
+    width = bust / 4 * scale
+    height = length * scale
 
-        file_path = "pattern.pdf"
-        c = canvas.Canvas(file_path, pagesize=A4)
+    # START DRAWING FRONT
+    x = 100
+    y = 700
 
-        x = 60
-        y = 750
+    # Shoulder slope
+    c.line(x, y, x + 60, y - 20)
 
-        # ================= FRONT =================
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(x, 800, "PART 1 - FRONT")
+    # Neck curve
+    c.arc(x - 20, y - 20, x + 40, y + 40, 0, 90)
 
-        p = c.beginPath()
-        p.moveTo(x, y)
+    # Armhole curve (important!)
+    c.bezier(
+        x + 60, y - 20,
+        x + 100, y - 60,
+        x + 80, y - 140,
+        x + 40, y - 180
+    )
 
-        # neckline logic
-        if neckline == "v":
-            p.lineTo(x+40, y-60)
-        else:
-            p.curveTo(x+20, y, x+40, y-20, x+60, y-50)
+    # Side seam
+    c.line(x + 40, y - 180, x + 40, y - height)
 
-        p.lineTo(x + fw, y - 50)
+    # Bottom
+    c.line(x + 40, y - height, x, y - height)
 
-        # armhole
-        p.curveTo(
-            x + fw, y - 90,
-            x + fw - 30, y - 140,
-            x + fw - 60, y - 180
-        )
+    # Center front
+    c.line(x, y - height, x, y)
 
-        p.lineTo(x + ww, y - length)
-        p.lineTo(x, y - length)
-        p.lineTo(x, y)
+    c.drawString(x, y + 20, "PART 1 - FRONT")
 
-        c.drawPath(p)
+    # BACK PART
+    x2 = x + 200
 
-        # ================= BACK =================
-        x2 = 300
-        c.drawString(x2, 800, "PART 2 - BACK")
+    # Shoulder
+    c.line(x2, y, x2 + 70, y - 10)
 
-        p2 = c.beginPath()
-        p2.moveTo(x2, y)
+    # Neck
+    c.arc(x2 - 10, y - 10, x2 + 40, y + 40, 0, 90)
 
-        p2.curveTo(x2+20, y, x2+30, y-10, x2+50, y-25)
-        p2.lineTo(x2 + fw, y - 40)
+    # Armhole (slightly deeper)
+    c.bezier(
+        x2 + 70, y - 10,
+        x2 + 110, y - 50,
+        x2 + 90, y - 150,
+        x2 + 50, y - 200
+    )
 
-        p2.curveTo(
-            x2 + fw, y - 80,
-            x2 + fw - 25, y - 130,
-            x2 + fw - 50, y - 170
-        )
+    # Side
+    c.line(x2 + 50, y - 200, x2 + 50, y - height)
 
-        p2.lineTo(x2 + ww, y - length)
-        p2.lineTo(x2, y - length)
-        p2.lineTo(x2, y)
+    # Bottom
+    c.line(x2 + 50, y - height, x2, y - height)
 
-        c.drawPath(p2)
+    # Center back
+    c.line(x2, y - height, x2, y)
 
-        # ================= SLEEVE =================
-        if sleeve_type != "sleeveless":
-            sx = x
-            sy = 250
+    c.drawString(x2, y + 20, "PART 2 - BACK")
 
-            c.drawString(sx, sy + 80, f"SLEEVE ({sleeve_type})")
+    # INFO
+    c.drawString(100, 50, f"Bust: {bust}  Waist: {waist}  Length: {length}")
 
-            sp = c.beginPath()
+    c.save()
+    buffer.seek(0)
 
-            sp.moveTo(sx, sy)
-            sp.curveTo(sx+40, sy+80, sx+120, sy+80, sx+160, sy)
-
-            sp.lineTo(sx+140, sy - 100)
-            sp.lineTo(sx+20, sy - 100)
-            sp.lineTo(sx, sy)
-
-            c.drawPath(sp)
-
-        # ---------- LABEL ----------
-        c.setFont("Helvetica", 9)
-        c.drawString(50, 50, f"Type: {dress_type} | Neck: {neckline} | Sleeve: {sleeve_type}")
-
-        c.save()
-
-        if os.path.exists(image_path):
-            os.remove(image_path)
-
-        return send_file(file_path, as_attachment=True)
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    return send_file(buffer, as_attachment=True, download_name="pattern.pdf", mimetype="application/pdf")
 
 
 if __name__ == "__main__":
