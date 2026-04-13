@@ -1,62 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Pattern Generator</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StitchForge • Sewing Pattern Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            background: #dff5e3;
-            font-family: sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 10px;
-            background: #7ecf9a;
-            color: white;
-            cursor: pointer;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap');
+        body { font-family: 'Inter', system_ui, sans-serif; }
+        .card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); }
+        .pastel-green { background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); }
     </style>
 </head>
-<body>
+<body class="pastel-green min-h-screen">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+        <div class="flex items-center justify-between mb-12">
+            <div class="flex items-center gap-x-3">
+                <div class="w-10 h-10 bg-emerald-600 rounded-2xl flex items-center justify-center text-white text-2xl">🧵</div>
+                <h1 class="text-4xl font-semibold tracking-tight text-emerald-900">StitchForge</h1>
+            </div>
+            <p class="text-emerald-700 text-lg">AI-Powered Sewing Patterns</p>
+        </div>
 
-<div class="card">
-    <h2>Upload Dress</h2>
-    <input type="file" id="file">
-    <br><br>
-    <button onclick="upload()">Next →</button>
-</div>
+        <div class="bg-white rounded-3xl shadow-xl p-10 card">
+            <h2 class="text-3xl font-semibold text-emerald-900 mb-2">Upload your garment photo</h2>
+            <p class="text-emerald-600 mb-8">Our engine will detect style, fit &amp; generate perfect patterns instantly</p>
+            
+            <form action="/upload" method="post" enctype="multipart/form-data" class="space-y-8">
+                <div class="border-2 border-dashed border-emerald-300 rounded-2xl p-8 text-center hover:border-emerald-400 transition-colors">
+                    <input type="file" name="image" id="image" accept="image/*" class="hidden" required>
+                    <label for="image" class="cursor-pointer flex flex-col items-center">
+                        <div id="preview" class="hidden w-48 h-48 mx-auto mb-4 border border-emerald-200 rounded-2xl overflow-hidden"></div>
+                        <div class="text-emerald-500 text-5xl mb-3">📸</div>
+                        <p class="font-medium text-emerald-700">Click to upload clothing image</p>
+                        <p class="text-emerald-500 text-sm mt-1">PNG, JPG, WebP • Max 16MB</p>
+                    </label>
+                </div>
 
-<script>
-function upload() {
-    let file = document.getElementById("file").files[0];
+                <div class="grid grid-cols-2 gap-6">
+                    <!-- Mode selection -->
+                    <div>
+                        <label class="block text-sm font-medium text-emerald-700 mb-2">Size mode</label>
+                        <div class="flex gap-2">
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="mode" value="standard" checked class="peer hidden">
+                                <div class="peer-checked:bg-emerald-600 peer-checked:text-white border border-emerald-200 rounded-2xl px-5 py-4 text-center font-medium text-emerald-700">Standard Sizes</div>
+                            </label>
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="mode" value="custom" class="peer hidden">
+                                <div class="peer-checked:bg-emerald-600 peer-checked:text-white border border-emerald-200 rounded-2xl px-5 py-4 text-center font-medium text-emerald-700">Custom Measurements</div>
+                            </label>
+                        </div>
+                    </div>
 
-    let formData = new FormData();
-    formData.append("file", file);
+                    <!-- Standard size selector -->
+                    <div id="size-select">
+                        <label class="block text-sm font-medium text-emerald-700 mb-2">Select size</label>
+                        <select name="size" class="w-full border border-emerald-200 rounded-2xl px-5 py-4 focus:outline-none focus:border-emerald-500">
+                            <option value="S">S (86-66-92 cm)</option>
+                            <option value="M" selected>M (92-72-98 cm)</option>
+                            <option value="L">L (100-80-106 cm)</option>
+                            <option value="XL">XL (108-88-114 cm)</option>
+                            <option value="XXL">XXL (116-96-122 cm)</option>
+                        </select>
+                    </div>
+                </div>
 
-    fetch("http://127.0.0.1:5000/upload", {
-        method: "POST",
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        localStorage.setItem("style", JSON.stringify(data));
-        window.location.href = "measure.html";
-    });
-}
-</script>
+                <button type="submit" 
+                        class="w-full bg-emerald-600 hover:bg-emerald-700 transition-colors text-white font-semibold py-6 rounded-3xl text-xl shadow-lg shadow-emerald-300 flex items-center justify-center gap-x-3">
+                    <span>Analyze Image &amp; Continue</span>
+                    <span class="text-2xl">→</span>
+                </button>
+            </form>
+        </div>
 
+        <p class="text-center text-emerald-500 text-sm mt-8">Production-ready patterns • Real tailoring formulas • A4 printable tiles</p>
+    </div>
+
+    <script>
+        // Tailwind script already loaded
+        function handleImagePreview() {
+            const input = document.getElementById('image');
+            const preview = document.getElementById('preview');
+            input.addEventListener('change', function(e) {
+                if (e.target.files && e.target.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        preview.innerHTML = `<img src="${ev.target.result}" class="w-full h-full object-cover">`;
+                        preview.classList.remove('hidden');
+                    }
+                    reader.readAsDataURL(e.target.files[0]);
+                }
+            });
+        }
+        handleImagePreview();
+    </script>
 </body>
 </html>
