@@ -1,50 +1,3 @@
-from flask import Flask, request, jsonify, send_file
-from flask_cors import CORS
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import pathobject
-from PIL import Image
-import os
-
-app = Flask(__name__)
-CORS(app)
-os.makedirs("uploads", exist_ok=True)
-
-# ---------- AI DETECTION ----------
-def detect(path):
-    img = Image.open(path)
-    w, h = img.size
-    r = h / w
-
-    if r > 1.5:
-        t = "gown"
-    elif r > 1.2:
-        t = "dress"
-    else:
-        t = "top"
-
-    sleeve = "sleeveless" if w > h else "short sleeve"
-    neck = "round"
-
-    if t == "gown":
-        m = ["bust", "waist", "hip", "length"]
-    elif t == "dress":
-        m = ["bust", "waist", "length"]
-    else:
-        m = ["bust", "shoulder"]
-
-    return {"type": t, "sleeve": sleeve, "neck": neck, "measurements": m}
-
-
-@app.route("/upload", methods=["POST"])
-def upload():
-    file = request.files["file"]
-    path = os.path.join("uploads", file.filename)
-    file.save(path)
-    return jsonify(detect(path))
-
-
-# ---------- PATTERN ENGINE ----------
 @app.route("/generate", methods=["POST"])
 def generate():
     try:
@@ -57,102 +10,70 @@ def generate():
 
         bust = cm(data.get("bust"), 90)
         waist = cm(data.get("waist"), 70)
-        hip = cm(data.get("hip"), 95)
         length = cm(data.get("length"), 100)
 
-        c = canvas.Canvas("pattern.pdf", pagesize=A4)
-        W, H = A4
+        page_w, page_h = A4
 
-        x = 50
-        y = H - 50
+        file_path = "pattern.pdf"
+        c = canvas.Canvas(file_path, pagesize=A4)
 
-        bw = bust / 4
+        # -------- SCALE DOWN TO FIT GRID --------
+        scale = 0.6
+        bw = (bust / 4) * scale
+        length = length * scale
 
-        # ---------------- FRONT WITH CURVES ----------------
-        c.drawString(x, y + 10, "PART 1 - FRONT")
+        cols = 2
+        rows = 2
 
-        p = c.beginPath()
+        part_count = 1
 
-        # start top-left
-        p.moveTo(x, y)
+        for row in range(rows):
+            for col in range(cols):
 
-        # neckline (curve)
-        p.curveTo(x + 20, y, x + 40, y - 10, x + 60, y - 30)
+                c.setFont("Helvetica", 10)
+                c.drawString(20, page_h - 20, f"PART {part_count} (Grid {row+1},{col+1})")
 
-        # shoulder to armhole
-        p.lineTo(x + bw, y - 40)
+                x = 40
+                y = page_h - 60
 
-        # armhole curve
-        p.curveTo(x + bw, y - 80, x + bw - 30, y - 120, x + bw - 40, y - 150)
+                # Draw FRONT piece (scaled)
+                p = c.beginPath()
+                p.moveTo(x, y)
 
-        # side seam
-        p.lineTo(x + bw - 20, y - length)
+                # neckline
+                p.curveTo(x+20, y, x+40, y-10, x+60, y-30)
 
-        # bottom
-        p.lineTo(x, y - length)
+                # shoulder
+                p.lineTo(x + bw, y - 40)
 
-        # close shape
-        p.lineTo(x, y)
+                # armhole
+                p.curveTo(x + bw, y - 80, x + bw - 30, y - 120, x + bw - 40, y - 150)
 
-        c.drawPath(p)
+                # waist shaping
+                p.lineTo(x + bw - 20, y - length)
 
-        # ---------------- BACK ----------------
-        c.drawString(x + 200, y + 10, "PART 2 - BACK")
+                # bottom
+                p.lineTo(x, y - length)
 
-        p2 = c.beginPath()
-        p2.moveTo(x + 200, y)
+                p.lineTo(x, y)
 
-        # back neck (shallower)
-        p2.curveTo(x + 220, y, x + 240, y - 5, x + 260, y - 15)
+                c.drawPath(p)
 
-        p2.lineTo(x + 200 + bw, y - 40)
+                # -------- SEAM ALLOWANCE --------
+                c.setDash(2,2)
+                c.rect(x-10, y-length-10, bw+20, length+20)
+                c.setDash()
 
-        p2.curveTo(x + 200 + bw, y - 80, x + 200 + bw - 30, y - 120, x + 200 + bw - 40, y - 150)
+                # -------- GRID CUT MARK --------
+                c.setFont("Helvetica", 8)
+                c.drawString(20, 20, "Cut & Join with adjacent pages")
 
-        p2.lineTo(x + 200 + bw - 20, y - length)
-        p2.lineTo(x + 200, y - length)
-        p2.lineTo(x + 200, y)
-
-        c.drawPath(p2)
-
-        # ---------------- SLEEVE (REAL SHAPE) ----------------
-        if data.get("sleeve") != "sleeveless":
-            c.drawString(x, y - length - 80, "PART 3 - SLEEVE")
-
-            sx = x
-            sy = y - length - 120
-
-            sleeve_w = bw
-            sleeve_h = 80
-
-            sp = c.beginPath()
-
-            # sleeve cap curve
-            sp.moveTo(sx, sy)
-
-            sp.curveTo(
-                sx + sleeve_w * 0.25, sy + sleeve_h,
-                sx + sleeve_w * 0.75, sy + sleeve_h,
-                sx + sleeve_w, sy
-            )
-
-            # bottom
-            sp.lineTo(sx + sleeve_w, sy - 60)
-            sp.lineTo(sx, sy - 60)
-            sp.lineTo(sx, sy)
-
-            c.drawPath(sp)
-
-        # ---------------- LABEL ----------------
-        c.drawString(x, 40, f"Type: {data.get('type')} | Sleeve: {data.get('sleeve')}")
+                c.showPage()
+                part_count += 1
 
         c.save()
 
-        return send_file("pattern.pdf", as_attachment=True)
+        return send_file(file_path, as_attachment=True)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
-if __name__ == "__main__":
-    app.run()
