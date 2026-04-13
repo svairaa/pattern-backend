@@ -1,99 +1,106 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-  <title>Measurements</title>
+    <title>Measurements</title>
+    <style>
+        body {
+            background: #dff5e3;
+            font-family: sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
 
-  <style>
-    body {
-      background: #dfeee7;
-      font-family: Arial;
-      text-align: center;
-      padding-top: 100px;
-    }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
 
-    .box {
-      background: white;
-      padding: 30px;
-      border-radius: 20px;
-      display: inline-block;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-    }
+        input, select {
+            margin: 5px;
+            padding: 8px;
+        }
 
-    h2 {
-      color: #2e7d32;
-    }
-
-    input {
-      display: block;
-      margin: 10px auto;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      width: 200px;
-    }
-
-    button {
-      padding: 10px 20px;
-      border-radius: 20px;
-      background: green;
-      color: white;
-      border: none;
-      margin-top: 10px;
-    }
-  </style>
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            background: #7ecf9a;
+            border: none;
+            border-radius: 10px;
+            color: white;
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="box">
-  <h2>Enter Measurements 📏</h2>
+<div class="card">
+    <h2>Select Size</h2>
 
-  <input placeholder="Bust">
-  <input placeholder="Waist">
-  <input placeholder="Length">
+    <select id="mode" onchange="toggle()">
+        <option value="standard">Standard</option>
+        <option value="custom">Custom</option>
+    </select>
 
-  <!-- ✅ BUTTON (already fixed here) -->
-  <button onclick="generatePattern()">Generate Pattern ➜</button>
+    <div id="standard">
+        <select id="size">
+            <option>S</option>
+            <option>M</option>
+            <option>L</option>
+            <option>XL</option>
+            <option>XXL</option>
+        </select>
+    </div>
+
+    <div id="custom" style="display:none;">
+        <input placeholder="Bust" id="bust"><br>
+        <input placeholder="Waist" id="waist"><br>
+        <input placeholder="Hip" id="hip"><br>
+        <input placeholder="Length" id="length"><br>
+        <input placeholder="Shoulder" id="shoulder"><br>
+        <input placeholder="Sleeve" id="sleeve"><br>
+    </div>
+
+    <button onclick="generate()">Generate Pattern</button>
 </div>
 
 <script>
-async function generatePattern() {
+function toggle() {
+    let mode = document.getElementById("mode").value;
+    document.getElementById("standard").style.display = mode === "standard" ? "block" : "none";
+    document.getElementById("custom").style.display = mode === "custom" ? "block" : "none";
+}
 
-  const inputs = document.querySelectorAll("input");
+function generate() {
+    let mode = document.getElementById("mode").value;
+    let style = JSON.parse(localStorage.getItem("style"));
 
-  const bust = inputs[0].value;
-  const waist = inputs[1].value;
-  const length = inputs[2].value;
+    let data = { mode: mode, style: style };
 
-  try {
-    const response = await fetch("https://pattern-backend-1.onrender.com/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        bust: bust,
-        waist: waist,
-        length: length
-      })
-    });
-
-    if (!response.ok) {
-      alert("Server error ❌");
-      return;
+    if (mode === "standard") {
+        data["size"] = document.getElementById("size").value;
+    } else {
+        data["measurements"] = {
+            bust: parseFloat(document.getElementById("bust").value),
+            waist: parseFloat(document.getElementById("waist").value),
+            hip: parseFloat(document.getElementById("hip").value),
+            length: parseFloat(document.getElementById("length").value),
+            shoulder: parseFloat(document.getElementById("shoulder").value),
+            sleeve: parseFloat(document.getElementById("sleeve").value)
+        };
     }
 
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "pattern.pdf";
-    a.click();
-
-  } catch (error) {
-    alert("Connection error ❌");
-  }
+    fetch("http://127.0.0.1:5000/generate", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(data => {
+        window.location.href = "http://127.0.0.1:5000/download?file=" + data.file;
+    });
 }
 </script>
 
