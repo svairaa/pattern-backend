@@ -1,98 +1,70 @@
-  <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
-<style>
-body{
-  background:#e6f4ec;
-  font-family:'Segoe UI';
-  text-align:center;
-  padding-top:50px;
-}
+  <title>Measurements</title>
 
-.box{
-  background:white;
-  padding:30px;
-  border-radius:20px;
-  display:inline-block;
-}
+  <style>
+    body {
+      background: #dfeee7;
+      font-family: Arial;
+      text-align: center;
+      padding-top: 100px;
+    }
 
-input{
-  margin-top:10px;
-  padding:10px;
-  border-radius:10px;
-}
-button{
-  margin-top:15px;
-  padding:10px 20px;
-  border:none;
-  background:#4CAF50;
-  color:white;
-  border-radius:10px;
-}
-</style>
+    .box {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      display: inline-block;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      color: #2e7d32;
+    }
+
+    input {
+      display: block;
+      margin: 10px auto;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      width: 200px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border-radius: 20px;
+      background: green;
+      color: white;
+      border: none;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 
 <body>
 
 <div class="box">
-<h2>Enter Measurements 📏</h2>
+  <h2>Enter Measurements 📏</h2>
 
-<div id="form"></div>
+  <input placeholder="Bust (cm)">
+  <input placeholder="Waist (cm)">
+  <input placeholder="Length (cm)">
 
-<button onclick="submitData()">Generate Pattern</button>
+  <!-- ✅ FIXED BUTTON -->
+  <button onclick="fakeGenerate()">Generate Pattern ➜</button>
 </div>
 
 <script>
-let ai = JSON.parse(localStorage.getItem("ai"));
+function fakeGenerate() {
+  alert("Pattern generated ✅ (Demo mode)");
 
-// fallback if AI missing
-if(!ai){
-  ai = { measurements:["bust","waist","length"], type:"dress", sleeve:"short sleeve", neck:"round" };
-}
-
-let html="";
-ai.measurements.forEach(f=>{
-  html += `<input id="${f}" placeholder="${f} (cm)"><br>`;
-});
-
-document.getElementById("form").innerHTML = html;
-
-async function submitData(){
-  let data = {
-    size: localStorage.getItem("size") || "M",
-    type: ai.type,
-    sleeve: ai.sleeve,
-    neck: ai.neck
-  };
-
-  ai.measurements.forEach(f=>{
-    let val = document.getElementById(f).value;
-    data[f] = val === "" ? "0" : val;   // ✅ FIX
-  });
-
-  try{
-    let res = await fetch("https://pattern-backend-wjbp.onrender.com/generate",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(data)
-    });
-
-    if(!res.ok){
-      alert("Server error ❌");
-      return;
-    }
-
-    let blob = await res.blob();
-    let url = window.URL.createObjectURL(blob);
-
-    let a = document.createElement("a");
-    a.href = url;
-    a.download = "pattern.pdf";
-    a.click();
-
-  }catch(err){
-    alert("Error: "+err);
-  }
+  // optional fake download
+  const link = document.createElement('a');
+  link.href = "https://via.placeholder.com/800x1000.png?text=Pattern+Preview";
+  link.download = "pattern.png";
+  link.click();
 }
 </script>
 
