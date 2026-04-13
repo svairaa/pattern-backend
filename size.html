@@ -1,22 +1,53 @@
   <!DOCTYPE html>
 <html>
-<body style="text-align:center;padding-top:100px;">
+<head>
+<style>
+body{
+  background:#e6f4ec;
+  font-family:'Segoe UI';
+  text-align:center;
+  padding-top:100px;
+}
 
-<h2>Select Size</h2>
+.box{
+  background:white;
+  padding:30px;
+  border-radius:20px;
+  display:inline-block;
+}
+button{
+  padding:10px 20px;
+  border:none;
+  background:#4CAF50;
+  color:white;
+  border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h2>Select Size 👗</h2>
 
 <select id="size">
-<option>S</option><option>M</option><option>L</option>
-<option>XL</option><option>XXL</option>
+<option>S</option>
+<option>M</option>
+<option>L</option>
+<option>XL</option>
+<option>XXL</option>
 <option value="custom">Custom</option>
 </select>
 
 <br><br>
-<button onclick="go()">Continue</button>
+
+<button onclick="go()">Continue ➜</button>
+</div>
 
 <script>
 function go(){
   localStorage.setItem("size",document.getElementById("size").value);
-  window.location.href="measure.html";
+  window.location.href="./measure.html";
 }
 </script>
 
