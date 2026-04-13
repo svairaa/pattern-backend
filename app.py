@@ -9,65 +9,97 @@ app = Flask(__name__)
 CORS(app)
 os.makedirs("uploads", exist_ok=True)
 
+# ---------- AI DETECTION ----------
 def detect(path):
     img = Image.open(path)
-    w,h = img.size
-    r = h/w
+    w, h = img.size
+    ratio = h / w
 
-    if r>1.5: t="gown"
-    elif r>1.2: t="dress"
-    else: t="top"
+    if ratio > 1.5:
+        dress_type = "gown"
+    elif ratio > 1.2:
+        dress_type = "dress"
+    else:
+        dress_type = "top"
 
-    sleeve = "sleeveless" if w>h else "short sleeve"
+    sleeve = "sleeveless" if w > h else "short sleeve"
     neck = "round"
 
-    if t=="gown":
-        m=["bust","waist","hip","length"]
-    elif t=="dress":
-        m=["bust","waist","length"]
+    if dress_type == "gown":
+        measurements = ["bust", "waist", "hip", "length"]
+    elif dress_type == "dress":
+        measurements = ["bust", "waist", "length"]
     else:
-        m=["bust","shoulder"]
+        measurements = ["bust", "shoulder"]
 
-    return {"type":t,"sleeve":sleeve,"neck":neck,"measurements":m}
+    return {
+        "type": dress_type,
+        "sleeve": sleeve,
+        "neck": neck,
+        "measurements": measurements
+    }
 
 @app.route("/upload", methods=["POST"])
 def upload():
-    f = request.files["file"]
-    path = "uploads/"+f.filename
-    f.save(path)
-    return jsonify(detect(path))
+    try:
+        file = request.files["file"]
+        path = os.path.join("uploads", file.filename)
+        file.save(path)
+        result = detect(path)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
+
+# ---------- PATTERN GENERATION ----------
 @app.route("/generate", methods=["POST"])
 def generate():
-    d = request.json
+    try:
+        data = request.json
 
-    def cm(x): return float(x)*28.35
+        def cm(val):
+            if val is None or val == "" or val == "0":
+                return 100 * 28.35   # default safe value
+            return float(val) * 28.35
 
-    bust = cm(d.get("bust",90))
-    length = cm(d.get("length",100))
+        bust = cm(data.get("bust"))
+        waist = cm(data.get("waist"))
+        length = cm(data.get("length"))
 
-    c = canvas.Canvas("pattern.pdf", pagesize=A4)
-    W,H = A4
+        file_path = "pattern.pdf"
 
-    x=50
-    y=H-50
+        c = canvas.Canvas(file_path, pagesize=A4)
+        W, H = A4
 
-    # FRONT
-    c.drawString(x,y+10,"FRONT")
-    c.rect(x,y-length,bust/4,length)
+        x = 50
+        y = H - 50
 
-    # BACK
-    c.drawString(x+150,y+10,"BACK")
-    c.rect(x+150,y-length,bust/4,length)
+        # FRONT
+        c.drawString(x, y + 10, "PART 1 - FRONT")
+        c.rect(x, y - length, bust / 4, length)
 
-    # SLEEVE
-    if d["sleeve"]!="sleeveless":
-        c.drawString(x,y-length-100,"SLEEVE")
-        c.circle(x+50,y-length-150,40)
+        # BACK
+        c.drawString(x + 200, y + 10, "PART 2 - BACK")
+        c.rect(x + 200, y - length, bust / 4, length)
 
-    c.save()
+        # SLEEVE
+        if data.get("sleeve") != "sleeveless":
+            c.drawString(x, y - length - 80, "PART 3 - SLEEVE")
+            c.circle(x + 60, y - length - 140, 40)
 
-    return send_file("pattern.pdf", as_attachment=True)
+        # GRID (for cutting)
+        for i in range(0, int(W), 50):
+            c.line(i, 0, i, H)
+        for j in range(0, int(H), 50):
+            c.line(0, j, W, j)
+
+        c.save()
+
+        return send_file(file_path, as_attachment=True)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run()
