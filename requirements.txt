@@ -1,6 +1,2 @@
-flask
-flask-cors
-ezdxf
-gunicorn
+Flask
 reportlab
-pillow
