@@ -1,3 +1,4 @@
+from flask_cors import CORS
 from flask import Flask, request, send_file, jsonify
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
@@ -6,6 +7,7 @@ from PIL import Image
 import os
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/")
 def home():
