@@ -1,45 +1,46 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Measurements</title>
-</head>
+<body style="text-align:center;padding-top:50px;">
 
-<body style="text-align:center; padding-top:100px; font-family:Arial;">
+<h2>Measurements</h2>
+<div id="form"></div>
 
-<button onclick="window.location.href='size.html'">⬅ Back</button>
-
-<h2>Enter Measurements 📏</h2>
-
-<input id="bust" placeholder="Bust"><br><br>
-<input id="waist" placeholder="Waist"><br><br>
-<input id="hip" placeholder="Hip"><br><br>
-<input id="length" placeholder="Length"><br><br>
-
-<button onclick="submitData()">Generate Pattern 🚀</button>
+<button onclick="send()">Generate Pattern</button>
 
 <script>
-async function submitData() {
+let ai = JSON.parse(localStorage.getItem("ai"));
+let fields = ai.measurements;
 
+let html="";
+fields.forEach(f=>{
+  html+=`<input id="${f}" placeholder="${f} cm"><br><br>`;
+});
+document.getElementById("form").innerHTML=html;
+
+async function send(){
   let data = {
-    size: localStorage.getItem("size"),
-    bust: document.getElementById("bust").value,
-    waist: document.getElementById("waist").value,
-    hip: document.getElementById("hip").value,
-    length: document.getElementById("length").value
+    size:localStorage.getItem("size"),
+    type:ai.type,
+    sleeve:ai.sleeve,
+    neck:ai.neck
   };
 
-  let res = await fetch("https://pattern-backend-wjbp.onrender.com/generate", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(data)
+  fields.forEach(f=>{
+    data[f]=document.getElementById(f).value;
   });
 
-  let blob = await res.blob();
+  let r = await fetch("https://pattern-backend-wjbp.onrender.com/generate",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(data)
+  });
+
+  let blob = await r.blob();
   let url = URL.createObjectURL(blob);
 
-  let a = document.createElement("a");
-  a.href = url;
-  a.download = "pattern.pdf";
+  let a=document.createElement("a");
+  a.href=url;
+  a.download="pattern.pdf";
   a.click();
 }
 </script>
