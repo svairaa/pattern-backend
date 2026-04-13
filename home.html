@@ -1,122 +1,91 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Upload Dress</title>
+<title>Dress AI</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: linear-gradient(135deg, #dfeee7, #cfe3d8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+<style>
+body{
+  margin:0;
+  font-family: 'Segoe UI';
+  background:#e6f4ec;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
 
-    .card {
-      background: white;
-      padding: 30px;
-      border-radius: 25px;
-      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-      text-align: center;
-      width: 300px;
-      animation: fadeIn 0.6s ease;
-    }
+/* Card */
+.card{
+  background:white;
+  padding:40px;
+  border-radius:25px;
+  text-align:center;
+  width:320px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+}
 
-    h2 {
-      color: #2e7d32;
-      margin-bottom: 20px;
-    }
+/* Title */
+h2{
+  color:#2e7d32;
+}
 
-    input {
-      margin-top: 10px;
-    }
+/* Button */
+button{
+  margin-top:15px;
+  padding:12px 25px;
+  border:none;
+  border-radius:20px;
+  background:#4CAF50;
+  color:white;
+  cursor:pointer;
+}
 
-    button {
-      margin-top: 20px;
-      padding: 12px 25px;
-      border: none;
-      border-radius: 20px;
-      background: #2e7d32;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
+/* Arrow */
+#next{
+  display:none;
+  font-size:25px;
+  margin-top:15px;
+  cursor:pointer;
+}
+</style>
 
-    button:hover {
-      background: #1b5e20;
-    }
-
-    #msg {
-      margin-top: 15px;
-      color: green;
-      font-weight: bold;
-    }
-
-    #arrow {
-      display: none;
-      margin-top: 20px;
-      font-size: 25px;
-      cursor: pointer;
-      color: #2e7d32;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px);}
-      to { opacity: 1; transform: translateY(0);}
-    }
-  </style>
 </head>
 
 <body>
 
 <div class="card">
-  <h2>Upload Dress Image 🌸</h2>
+  <h2>Upload Your Dress 👗</h2>
 
-  <input type="file" id="file">
+  <input type="file" id="file"><br>
 
-  <br>
+  <button onclick="send()">Analyze ➜</button>
 
-  <button onclick="send()">Send ➤</button>
+  <p id="out"></p>
 
-  <div id="msg"></div>
-
-  <div id="arrow" onclick="goNext()">➡</div>
+  <div id="next" onclick="go()">➡</div>
 </div>
 
 <script>
-async function send() {
-  let fileInput = document.getElementById("file");
-  let file = fileInput.files[0];
+async function send(){
+  let f=document.getElementById("file").files[0];
+  if(!f){ alert("Select image"); return;}
 
-  if (!file) {
-    alert("Please select image ❗");
-    return;
-  }
+  let fd=new FormData();
+  fd.append("file",f);
 
-  let formData = new FormData();
-  formData.append("file", file);
+  let r=await fetch("https://pattern-backend-wjbp.onrender.com/upload",{method:"POST",body:fd});
+  let d=await r.json();
 
-  try {
-    let response = await fetch("https://pattern-backend-wjbp.onrender.com/upload", {
-      method: "POST",
-      body: formData
-    });
+  localStorage.setItem("ai",JSON.stringify(d));
 
-    let data = await response.json();
+  document.getElementById("out").innerText=
+    "Type: "+d.type+" | Sleeve: "+d.sleeve+" | Neck: "+d.neck;
 
-    document.getElementById("msg").innerHTML = "Uploaded Successfully ✅";
-    document.getElementById("arrow").style.display = "block";
-
-  } catch (error) {
-    alert("Upload failed ❌");
-  }
+  document.getElementById("next").style.display="block";
 }
 
-function goNext() {
-  window.location.href = "size.html";
+function go(){
+  window.location.href="./size.html";
 }
 </script>
 
