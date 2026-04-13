@@ -1,42 +1,77 @@
 <!DOCTYPE html>
 <html>
-<body style="text-align:center;padding-top:50px;">
+<head>
+<style>
+body{
+  background:#e6f4ec;
+  font-family:'Segoe UI';
+  text-align:center;
+  padding-top:50px;
+}
 
-<h2>Measurements</h2>
+.box{
+  background:white;
+  padding:30px;
+  border-radius:20px;
+  display:inline-block;
+}
+
+input{
+  margin-top:10px;
+  padding:10px;
+  border-radius:10px;
+}
+button{
+  margin-top:15px;
+  padding:10px 20px;
+  border:none;
+  background:#4CAF50;
+  color:white;
+  border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h2>Enter Measurements 📏</h2>
+
 <div id="form"></div>
 
-<button onclick="send()">Generate Pattern</button>
+<button onclick="submit()">Generate Pattern</button>
+</div>
 
 <script>
-let ai = JSON.parse(localStorage.getItem("ai"));
-let fields = ai.measurements;
-
+let ai=JSON.parse(localStorage.getItem("ai"));
 let html="";
-fields.forEach(f=>{
-  html+=`<input id="${f}" placeholder="${f} cm"><br><br>`;
+
+ai.measurements.forEach(f=>{
+  html+=`<input id="${f}" placeholder="${f} cm"><br>`;
 });
+
 document.getElementById("form").innerHTML=html;
 
-async function send(){
-  let data = {
+async function submit(){
+  let data={
     size:localStorage.getItem("size"),
     type:ai.type,
     sleeve:ai.sleeve,
     neck:ai.neck
   };
 
-  fields.forEach(f=>{
+  ai.measurements.forEach(f=>{
     data[f]=document.getElementById(f).value;
   });
 
-  let r = await fetch("https://pattern-backend-wjbp.onrender.com/generate",{
+  let r=await fetch("https://pattern-backend-wjbp.onrender.com/generate",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify(data)
   });
 
-  let blob = await r.blob();
-  let url = URL.createObjectURL(blob);
+  let blob=await r.blob();
+  let url=URL.createObjectURL(blob);
 
   let a=document.createElement("a");
   a.href=url;
