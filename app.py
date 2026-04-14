@@ -1,3 +1,10 @@
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "App is working ✅"
 from flask import Flask, render_template, request, redirect, url_for, session, send_file, jsonify
 from werkzeug.utils import secure_filename
 from PIL import Image
