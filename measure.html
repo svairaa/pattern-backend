@@ -1,87 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Measurements • StitchForge</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap');
-        body { font-family: 'Inter', system_ui, sans-serif; }
-        .pastel-green { background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); }
-    </style>
+<style>
+body{
+  background:#e6f4ea;
+  text-align:center;
+  padding-top:100px;
+}
+.box{
+  background:white;
+  padding:30px;
+  border-radius:20px;
+  display:inline-block;
+}
+input{
+  display:block;
+  margin:10px auto;
+  padding:10px;
+}
+button{
+  padding:10px 20px;
+  background:green;
+  color:white;
+  border:none;
+  border-radius:20px;
+}
+</style>
 </head>
-<body class="pastel-green min-h-screen">
-    <div class="max-w-4xl mx-auto px-6 py-12">
-        <div class="flex justify-between items-center mb-8">
-            <div class="flex items-center gap-x-3">
-                <div class="w-8 h-8 bg-emerald-600 rounded-2xl flex items-center justify-center text-white text-xl">🧵</div>
-                <h1 class="text-3xl font-semibold text-emerald-900">StitchForge</h1>
-            </div>
-            <a href="/" class="text-emerald-600 hover:text-emerald-700 flex items-center gap-x-1 text-sm font-medium">
-                ← Back to upload
-            </a>
-        </div>
 
-        <div class="bg-white rounded-3xl shadow-2xl p-10">
-            <h2 class="text-3xl font-semibold mb-1">Detected garment</h2>
-            <div class="inline-flex items-center gap-x-6 bg-emerald-50 rounded-2xl px-6 py-3 text-emerald-700 mb-8">
-                <div><span class="font-medium">Type:</span> {{ detection.garment_type|capitalize }}</div>
-                <div><span class="font-medium">Sleeve:</span> {{ detection.sleeve_type|capitalize }}</div>
-                <div><span class="font-medium">Neckline:</span> {{ detection.neckline|capitalize }}</div>
-                <div><span class="font-medium">Fit:</span> {{ detection.fit|capitalize }}</div>
-            </div>
+<body>
 
-            <form action="/generate" method="post" class="space-y-8">
-                {% if mode == 'standard' %}
-                <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6">
-                    <p class="text-emerald-700 font-medium">Using standard size <span class="font-semibold">{{ size or 'M' }}</span> measurements (pre-filled)</p>
-                </div>
-                {% endif %}
+<div class="box">
+<h2>Measurements</h2>
 
-                <div class="grid grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-emerald-700 text-sm font-medium mb-2">Bust (cm)</label>
-                        <input type="number" name="bust" value="{{ measurements.bust or 92 }}" step="0.1" class="w-full border border-emerald-200 focus:border-emerald-400 rounded-2xl px-5 py-4 text-lg" required>
-                    </div>
-                    <div>
-                        <label class="block text-emerald-700 text-sm font-medium mb-2">Waist (cm)</label>
-                        <input type="number" name="waist" value="{{ measurements.waist or 72 }}" step="0.1" class="w-full border border-emerald-200 focus:border-emerald-400 rounded-2xl px-5 py-4 text-lg" required>
-                    </div>
-                    <div>
-                        <label class="block text-emerald-700 text-sm font-medium mb-2">Hip (cm)</label>
-                        <input type="number" name="hip" value="{{ measurements.hip or 98 }}" step="0.1" class="w-full border border-emerald-200 focus:border-emerald-400 rounded-2xl px-5 py-4 text-lg">
-                    </div>
-                    <div>
-                        <label class="block text-emerald-700 text-sm font-medium mb-2">Garment Length (cm)</label>
-                        <input type="number" name="length" value="{{ measurements.length or 66 }}" step="0.1" class="w-full border border-emerald-200 focus:border-emerald-400 rounded-2xl px-5 py-4 text-lg" required>
-                    </div>
-                    <div>
-                        <label class="block text-emerald-700 text-sm font-medium mb-2">Shoulder width (cm)</label>
-                        <input type="number" name="shoulder" value="{{ measurements.shoulder or 39 }}" step="0.1" class="w-full border border-emerald-200 focus:border-emerald-400 rounded-2xl px-5 py-4 text-lg" required>
-                    </div>
-                    {% if detection.sleeve_type != 'sleeveless' %}
-                    <div>
-                        <label class="block text-emerald-700 text-sm font-medium mb-2">Sleeve length (cm)</label>
-                        <input type="number" name="sleeve_length" value="{{ measurements.sleeve_length or 56 }}" step="0.1" class="w-full border border-emerald-200 focus:border-emerald-400 rounded-2xl px-5 py-4 text-lg" required>
-                    </div>
-                    {% endif %}
-                </div>
+<input id="bust" placeholder="Bust">
+<input id="waist" placeholder="Waist">
+<input id="length" placeholder="Length">
 
-                <button type="submit"
-                        class="w-full mt-6 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xl py-7 rounded-3xl flex items-center justify-center gap-x-3 shadow-lg shadow-emerald-300">
-                    GENERATE SEWING PATTERN PDF
-                    <span class="text-3xl">📄</span>
-                </button>
-            </form>
+<button onclick="generate()">Generate Pattern</button>
+</div>
 
-            <p class="text-xs text-emerald-500 text-center mt-8">Pattern includes bodice front/back, sleeve (if needed), seam allowances, and A4 tiling grid with assembly numbers. 100% stitch-ready.</p>
-        </div>
-    </div>
+<script>
+async function generate(){
 
-    <script>
-        // Auto-adjust required fields based on detected garment (already handled server-side)
-        console.log('✅ Full production sewing pattern system ready');
-    </script>
+  const data={
+    bust:document.getElementById("bust").value,
+    waist:document.getElementById("waist").value,
+    length:document.getElementById("length").value
+  };
+
+  const res=await fetch("https://pattern-backend-1.onrender.com/generate",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(data)
+  });
+
+  const blob=await res.blob();
+  const url=window.URL.createObjectURL(blob);
+
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="pattern.pdf";
+  a.click();
+}
+</script>
+
 </body>
 </html>
